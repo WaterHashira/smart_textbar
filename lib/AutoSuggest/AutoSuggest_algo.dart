@@ -1,98 +1,29 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:smart_textbar/dictionary.dart';
 
-class Trie {
-  class TrieNode {
-  Map<Character, TrieNode> children;
-  char c;
-  boolean isWord;
+import 'package:autotrie/autotrie.dart';
+import 'package:smart_textbar/AutoSuggest/AutoSuggest_data.dart';
 
-  public TrieNode(char c) {
-  this.c = c;
-  children = new HashMap<>();
-  }
+class AutoSuggest_Algo{
 
-  public TrieNode() {
-  children = new HashMap<>();
-  }
+  File AutoSuggestTrie = File("../AutoSuggest_data.dart");
+  var engine = AutoComplete(engine: SortEngine.configMulti(Duration(seconds: 1), 15, 0.5, 0.5)); //You can also initialize with a starting databank.
 
-  public void insert(String word) {
-  if (word == null || word.isEmpty())
-  return;
-  char firstChar = word.charAt(0);
-  TrieNode child = children.get(firstChar);
-  if (child == null) {
-  child = new TrieNode(firstChar);
-  children.put(firstChar, child);
-  }
 
-  if (word.length() > 1)
-  child.insert(word.substring(1));
-  else
-  child.isWord = true;
-  }
-
-  }
-
-  TrieNode root;
-
-  public Trie(List<String> words) {
-  root = new TrieNode();
-  for (String word : words)
-  root.insert(word);
-
-  }
-
-  public boolean find(String prefix, boolean exact) {
-  TrieNode lastNode = root;
-  for (char c : prefix.toCharArray()) {
-  lastNode = lastNode.children.get(c);
-  if (lastNode == null)
-  return false;
-  }
-  return !exact || lastNode.isWord;
-  }
-
-  public boolean find(String prefix) {
-  return find(prefix, false);
-  }
-
-  public void suggestHelper(TrieNode root, List<String> list, StringBuffer curr) {
-  if (root.isWord) {
-  list.add(curr.toString());
-  }
-
-  if (root.children == null || root.children.isEmpty())
-  return;
-
-  for (TrieNode child : root.children.values()) {
-  suggestHelper(child, list, curr.append(child.c));
-  curr.setLength(curr.length() - 1);
-  }
-  }
-
-  public List<String> suggest(String prefix) {
-  List<String> list = new ArrayList<>();
-  TrieNode lastNode = root;
-  StringBuffer curr = new StringBuffer();
-  for (char c : prefix.toCharArray()) {
-  lastNode = lastNode.children.get(c);
-  if (lastNode == null)
-  return list;
-  curr.append(c);
-  }
-  suggestHelper(lastNode, list, curr);
-  return list;
+  void populatingTrie() async{
+    final int dictionaryLength = word_dictionary.length;
+    for(int i = dictionaryLength-1 ; i >= 0 ; i--){
+       //TODO: ACCORDING TO WRITTEN INN REGISTER
+      for(int j=0 ; j < dictionaryLength-i ; j++){
+        engine.enter(word_dictionary[i]);
+      }
+    }
+    await engine.persist(AutoSuggestTrie);
   }
 
 
-  public static void main(String[] args) {
-  List<String> words = List.of("hello", "dog", "hell", "cat", "a", "hel","help","helps","helping");
-  Trie trie = new Trie(words);
-
-  System.out.println(trie.suggest("hel"));
+  List<String> recommendations (String prefix){
+    return engine.suggest(prefix);
   }
-
 }

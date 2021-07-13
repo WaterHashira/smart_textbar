@@ -8,6 +8,8 @@ import 'package:smart_textbar/textbar.dart';
 
 import 'package:smart_textbar/ex.dart';
 
+import 'package:autotrie/autotrie.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 
 void main() {
@@ -30,7 +32,27 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-class texttbar_example extends StatelessWidget {
+class texttbar_example extends StatefulWidget {
+  @override
+  _texttbar_exampleState createState() => _texttbar_exampleState();
+}
+
+class _texttbar_exampleState extends State<texttbar_example> {
+  @override
+  void initState() {
+    // TODO: implement initState
+
+    super.initState();
+  }
+  void permission() async{
+    var status = await Permission.microphone.status;
+
+    if (status.isDenied) {
+      // We didn't ask for permission yet.
+      await Permission.microphone.request();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,4 +66,5 @@ class texttbar_example extends StatelessWidget {
     );
   }
 }
+
 
