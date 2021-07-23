@@ -1,9 +1,12 @@
+import 'dart:ui' as ui;
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:math' as Math;
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
@@ -38,9 +41,114 @@ class TextBar extends StatefulWidget {
   //VOICE TO TEXT MODE PARAMETERS:-
   final Icon voice_button_icon;
 
+  //GENERAL PROPERTIES OF TEXTFIELDS:-
+  Key? key;
+  var controller;
+  var focusNode;
+  var decoration = const InputDecoration();
+  TextInputType? keyboardType;
+  var textInputAction;
+  var textCapitalization = TextCapitalization.none;
+  var style;
+  var strutStyle;
+  var textAlign = TextAlign.start;
+  var textAlignVertical;
+  var textDirection;
+  var readOnly = false;
+  ToolbarOptions? toolbarOptions;
+  var showCursor;
+  var autofocus = false;
+  var obscuringCharacter = '•';
+  var obscureText = false;
+  var autocorrect = true;
+  SmartDashesType? smartDashesType;
+      SmartQuotesType? smartQuotesType;
+  var enableSuggestions = true;
+  var maxLines = 1;
+  var minLines;
+  var expands = false;
+  var maxLength;
+  var maxLengthEnforcement;
+  var onEditingComplete;
+  var onSubmitted;
+  var onAppPrivateCommand;
+  var inputFormatters;
+  var enabled;
+  var cursorWidth = 2.0;
+  var cursorHeight;
+  var cursorRadius;
+  var cursorColor;
+  var selectionHeightStyle = ui.BoxHeightStyle.tight;
+  var selectionWidthStyle = ui.BoxWidthStyle.tight;
+  var keyboardAppearance;
+  var scrollPadding = const EdgeInsets.all(20.0);
+  var dragStartBehavior = DragStartBehavior.start;
+  var enableInteractiveSelection = true;
+  var onTap;
+  var mouseCursor;
+  var buildCounter;
+  var scrollController;
+  var scrollPhysics;
+  var autofillHints;
+  var specialTextSpanBuilder;
+  var selectionControls;
+  var restorationId;
+
   TextBar({this.text_color = Colors.black , this.onChanged ,this.autoCorrect = false ,
     this.blindMode = false , this.speaker_language = 'en-IN' , this.volume = 0.5 , this.voice_pitch = 1.0 , this.rate = 0.5 , this.speaker_highlight_color = Colors.red ,
-    this.voiceToTextMode = false , this.voice_button_icon = const Icon(Icons.mic), });
+    this.voiceToTextMode = false , this.voice_button_icon = const Icon(Icons.mic),
+    Key? key,
+    this.controller,
+    this.focusNode,
+    this.decoration = const InputDecoration(),
+    TextInputType? keyboardType,
+    this.textInputAction,
+    this.textCapitalization = TextCapitalization.none,
+    this.style,
+    this.strutStyle,
+    this.textAlign = TextAlign.start,
+    this.textAlignVertical,
+    this.textDirection,
+    this.readOnly = false,
+    ToolbarOptions? toolbarOptions,
+    this.showCursor,
+    this.autofocus = false,
+    this.obscuringCharacter = '•',
+    this.obscureText = false,
+    this.autocorrect = true,
+    SmartDashesType? smartDashesType,
+    SmartQuotesType? smartQuotesType,
+    this.enableSuggestions = true,
+    this.maxLines = 1,
+    this.minLines,
+    this.expands = false,
+    this.maxLength,
+    this.maxLengthEnforcement,
+    this.onEditingComplete,
+    this.onSubmitted,
+    this.onAppPrivateCommand,
+    this.inputFormatters,
+    this.enabled,
+    this.cursorWidth = 2.0,
+    this.cursorHeight,
+    this.cursorRadius,
+    this.cursorColor,
+    this.selectionHeightStyle = ui.BoxHeightStyle.tight,
+    this.selectionWidthStyle = ui.BoxWidthStyle.tight,
+    this.keyboardAppearance,
+    this.scrollPadding = const EdgeInsets.all(20.0),
+    this.dragStartBehavior = DragStartBehavior.start,
+    this.enableInteractiveSelection = true,
+    this.onTap,
+    this.mouseCursor,
+    this.buildCounter,
+    this.scrollController,
+    this.scrollPhysics,
+    this.autofillHints,
+    this.specialTextSpanBuilder,
+    this.selectionControls,
+    this.restorationId,
+  });
   //TODO:PUT DEFAULT FUNCTIONING OF THE ICON BUTTON OF THE VOICE TO TEXT's voice_button:
 
   @override
@@ -70,13 +178,21 @@ class _TextBarState extends State<TextBar> {
   //POPULATING THE TRIE FOR THE FIRST TIME IF THE APP IS BEING OPENED FOR THE FIRST TIME EVER
   //IN THE DEVICE WHICH GETS PERSISTED IN THE AutoSuggest_data FILE THAT MEANS WE ONLY NEED TO
   //POPULATE THE TRIE IF THE APP IS RUN FOR THE FIRST TIME ON THE DEVICE.
+
+  bool first_run = true;
+  SpeechToText speech = SpeechToText();
   @override
   initState() {
+    speech = SpeechToText();
     super.initState();
+    AutoSuggest_Algo().populatingTrie(first_run);
     if(isFirstTime() == true){
-      AutoSuggest_Algo().populatingTrie();
+      first_run = true;
+      print('its the first run');
+      //AutoSuggest_Algo().populatingTrie(first_run);
     }
     else{
+      first_run = false;
       print('its not the first run');
     }
     initTts();
@@ -88,10 +204,10 @@ class _TextBarState extends State<TextBar> {
     var isFirstTime = prefs.getBool('first_time');
     if (isFirstTime != null && !isFirstTime) {
       prefs.setBool('first_time', false);
-      return false;
+      return true;
     } else {
       await prefs.setBool('first_time', false);
-      return true;
+      return false;
     }
   }
 
@@ -237,31 +353,36 @@ class _TextBarState extends State<TextBar> {
   String _currentLocaleId = '';
   int resultListened = 0;
   List<LocaleName> _localeNames = [];
-  final SpeechToText speech = SpeechToText();
+
+  String stt_text = ''; //variable where stt text is stored
+
+  bool isListening = false; //variable for knowing whether it is still listening or not
+  var hasSpeech;
 
   Future<void> initSpeechState() async {
-    var hasSpeech = await speech.initialize(
-        onError: errorListener,
-        onStatus: statusListener,
-        debugLogging: true,
-        finalTimeout: Duration(milliseconds: 0));
-    if (hasSpeech) {
-      _localeNames = await speech.locales();
+    if (!isListening) {
+      bool available = await speech.initialize(
+        onStatus: (val) => print('onStatus: $val'),
+        onError: (val) => print('onError: $val'),
+      );
+      if (available) {
+        setState(() => isListening = true);
+        speech.listen(
+          onResult: (val) => setState(() {
+            stt_text = val.recognizedWords;
 
-      var systemLocale = await speech.systemLocale();
-      _currentLocaleId = systemLocale?.localeId ?? '';
+          }),
+        );
+      }
+    } else {
+      setState(() => isListening = false);
+      speech.stop();
     }
-
-    if (!mounted) return;
-
-    setState(() {
-      _hasSpeech = hasSpeech;
-    });
   }
 
+
+  //Method for starting the listening process:-
   void startListening() {
-    lastWords = '';
-    lastError = '';
     speech.listen(
         onResult: resultListener,
         listenFor: Duration(seconds: 30),
@@ -274,6 +395,7 @@ class _TextBarState extends State<TextBar> {
     setState(() {});
   }
 
+  //Method for stopping the ongoing listening process:-
   void stopListening() {
     speech.stop();
     setState(() {
@@ -281,6 +403,7 @@ class _TextBarState extends State<TextBar> {
     });
   }
 
+  //Method for canceling the ongoing listening process:-
   void cancelListening() {
     speech.cancel();
     setState(() {
@@ -288,14 +411,14 @@ class _TextBarState extends State<TextBar> {
     });
   }
 
+  //Method for listening to the stt result:-
   void resultListener(SpeechRecognitionResult result) {
-    ++resultListened;
-    print('Result listener $resultListened');
     setState(() {
-      lastWords = '${result.recognizedWords} - ${result.finalResult}';
+      stt_text = result.recognizedWords;
     });
   }
 
+  //Method for changing the speech volume of the stt speacker:-
   void soundLevelListener(double level) {
     minSoundLevel = Math.min(minSoundLevel, level);
     maxSoundLevel = Math.max(maxSoundLevel, level);
@@ -305,6 +428,7 @@ class _TextBarState extends State<TextBar> {
     });
   }
 
+  //Method for handling the stt errors:-
   void errorListener(SpeechRecognitionError error) {
     print("Received error status: $error, listening: ${speech.isListening}");
     setState(() {
@@ -312,6 +436,7 @@ class _TextBarState extends State<TextBar> {
     });
   }
 
+  //Method for listening to the status of stt:-
   void statusListener(String status) {
     // print(
     // 'Received listener status: $status, listening: ${speech.isListening}');
@@ -320,6 +445,7 @@ class _TextBarState extends State<TextBar> {
     });
   }
 
+  //Method for switching the speaker's language:-
   void _switchLang(selectedVal) {
     setState(() {
       _currentLocaleId = selectedVal;
@@ -456,6 +582,7 @@ class _TextBarState extends State<TextBar> {
 
         onChanged: widget.onChanged,
       ));
+
 
   //THIS METHOD HANDELS THE TEXT FIELD WORKING OF THE BOTH BLIND MODE AND VOICE TO TEXT MODE TOGETHER:-
 Widget _inputSection_all_mode() => Container(
