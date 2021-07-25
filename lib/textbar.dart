@@ -470,7 +470,7 @@ class _TextBarState extends State<TextBar> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: <Widget>[
                           _inputSection_blind_mode(),
-                          _futureBuilder(),
+                          //_futureBuilder(),
                         ],
                       );
                     }
@@ -487,7 +487,7 @@ class _TextBarState extends State<TextBar> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: <Widget>[
                           _inputSection_all_mode(),
-                          _futureBuilder(),
+                          //_futureBuilder(),
                         ],
                       );
                     }
@@ -504,7 +504,7 @@ class _TextBarState extends State<TextBar> {
             )));
   }
 
-  Widget _futureBuilder() => FutureBuilder<dynamic>(
+  /*Widget _futureBuilder() => FutureBuilder<dynamic>(
       future: _getLanguages(),
       builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
         if (snapshot.hasData) {
@@ -513,7 +513,7 @@ class _TextBarState extends State<TextBar> {
           return Text('Error loading languages...');
         } else
           return Text('Loading Languages...');
-      });
+      });*/
 
 
   //value of the text field will be stored in this widget:-

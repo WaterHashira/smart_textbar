@@ -6,8 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:smart_textbar/smart_textbar.dart';
 import 'package:smart_textbar/textbar.dart';
 
-import 'package:smart_textbar/ex.dart';
-
 import 'package:autotrie/autotrie.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -67,4 +65,27 @@ class _texttbar_exampleState extends State<texttbar_example> {
   }
 }
 
+class Ex extends StatefulWidget {
+  @override
+  _ExState createState() => _ExState();
+}
 
+class _ExState extends State<Ex> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: FlatButton(
+          child: Text('here'),
+          onPressed: (){
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) => TextBar(
+              autoCorrect: true,
+              blindMode: true,
+              voiceToTextMode: true,
+            ),));
+          },
+        ),
+      ),
+    );
+  }
+}
