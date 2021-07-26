@@ -150,3 +150,9 @@ One of the most notable features of smart_textbar is the AutoSuggest functionali
 When **TextBar()** widget is used for the first time in the app by the user, the trie is populated and stored within the app itself which provides a fast and accurate list of recommendations every time user types a new word in the TextBar()
 
 
+##BlindMode Example:-
+
+
+
+https://user-images.githubusercontent.com/66126437/126984706-9db55c0d-b831-4fb3-ba3b-5f006492b9e6.mp4
+
