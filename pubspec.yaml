@@ -1,6 +1,6 @@
 name: smart_textbar
-description: A new Flutter plugin.
-version: 0.0.1
+description: smart_textbar is a Flutter Plugin that provides an ultimate Flutter textfield, drastically reducing the need to implement various functionalities, that although relatively complex but has become a norm in mordern apps and websites
+version: 0.0.4
 homepage: https://github.com/WaterHashira/smart_textbar
 
 environment:

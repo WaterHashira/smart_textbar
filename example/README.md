@@ -120,6 +120,8 @@ class _ExState extends State<Ex> {
  - Set the bool property of the  **TextBar()** widget, **blindMode** as true this would allow all the properties that are included in blindMode to show effect in the widget according to their values.
  - **BlindMode Properties:**  
  
+ (By this version Blind mode will be able to support english language in over 60 accents from all over the world)
+ 
  Property | Data Type | Explanation
 ------------ | ------------- | -------------
 Speaker Language | String? | this decides what language will the speaker speak(choose amoung the language codes available)
@@ -150,4 +152,9 @@ One of the most notable features of smart_textbar is the AutoSuggest functionali
 When **TextBar()** widget is used for the first time in the app by the user, the trie is populated and stored within the app itself which provides a fast and accurate list of recommendations every time user types a new word in the TextBar()
 
 
+**smart_textbar working**:-
+
+
+
+https://user-images.githubusercontent.com/66126437/126984706-9db55c0d-b831-4fb3-ba3b-5f006492b9e6.mp4
 

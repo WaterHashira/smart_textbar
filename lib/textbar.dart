@@ -149,7 +149,6 @@ class TextBar extends StatefulWidget {
     this.selectionControls,
     this.restorationId,
   });
-  //TODO:PUT DEFAULT FUNCTIONING OF THE ICON BUTTON OF THE VOICE TO TEXT's voice_button:
 
   @override
   _TextBarState createState() => _TextBarState();
@@ -185,7 +184,6 @@ class _TextBarState extends State<TextBar> {
   initState() {
     speech = SpeechToText();
     super.initState();
-    AutoSuggest_Algo().populatingTrie(first_run);
     if(isFirstTime() == true){
       first_run = true;
       print('its the first run');
@@ -219,24 +217,27 @@ class _TextBarState extends State<TextBar> {
       _getEngines();
     }
 
+    Color general_text_color = widget.text_color;
+
+    //called when speaker starts speaking:-
     flutterTts.setStartHandler(() {
       setState(() {
         widget.text_color = widget.speaker_highlight_color;
-
         print("Playing");
         ttsState = TtsState.playing;
       });
     });
 
+    //called when speaker completes speaking:-
     flutterTts.setCompletionHandler(() {
       setState(() {
-        widget.text_color = Colors.black; //TODO: CHANGE THIS TO THE COLOR USER (DEV) WANTS IN GENERIC TEXTFIELD PARAMETERS
-
+        widget.text_color = general_text_color;
         print("Complete");
         ttsState = TtsState.stopped;
       });
     });
 
+    //called when speaking process is cancelled in between:-
     flutterTts.setCancelHandler(() {
       setState(() {
         print("Cancel");
@@ -252,6 +253,7 @@ class _TextBarState extends State<TextBar> {
         });
       });
 
+    //called when we want to continue the ongoing process of speaking:-
       flutterTts.setContinueHandler(() {
         setState(() {
           print("Continued");
@@ -260,6 +262,7 @@ class _TextBarState extends State<TextBar> {
       });
     }
 
+    //called when speaking process have an error:-
     flutterTts.setErrorHandler((msg) {
       setState(() {
         print("error: $msg");
@@ -268,6 +271,7 @@ class _TextBarState extends State<TextBar> {
     });
   }
 
+  //Method for getting a list of all the available languages for blind mode:-
   Future<dynamic> _getLanguages() => flutterTts.getLanguages;
 
   Future _getEngines() async {
@@ -309,7 +313,8 @@ class _TextBarState extends State<TextBar> {
     flutterTts.stop();
   }
 
-  List<DropdownMenuItem<String>> getLanguageDropDownMenuItems(
+  //for getting getLanguageDropDownMenuItems:-
+  /*List<DropdownMenuItem<String>> getLanguageDropDownMenuItems(
       dynamic languages) {
     var items = <DropdownMenuItem<String>>[];
     for (dynamic type in languages) {
@@ -319,6 +324,7 @@ class _TextBarState extends State<TextBar> {
     return items;
   }
 
+  //method for changing the language selected form the dropdown:-
   void changedLanguageDropDownItem(String? selectedType) {
     setState(() {
       widget.speaker_language = selectedType;
@@ -329,7 +335,7 @@ class _TextBarState extends State<TextBar> {
             .then((value) => isCurrentLanguageInstalled = (value as bool));
       }
     });
-  }
+  }*/
 
   //method that triggers when text in textfield is changed:-
   void _onChange(String text) {
@@ -456,52 +462,23 @@ class _TextBarState extends State<TextBar> {
 //BUILD (UI) IMPLEMENTATION:-
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        home: Scaffold(
-            appBar: AppBar(
-              title: Text('Flutter TTS'),
-            ),
-            body: SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: Builder(
-                  builder: (context){
-                    if(widget.blindMode == true && widget.voiceToTextMode == false){
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          _inputSection_blind_mode(),
-                          //_futureBuilder(),
-                        ],
-                      );
-                    }
-                    else if(widget.blindMode == false && widget.voiceToTextMode == true){
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          _inputSection_voice_to_text_mode(),
-                        ],
-                      );
-                    }
-                    else if(widget.blindMode == true && widget.voiceToTextMode == true){
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          _inputSection_all_mode(),
-                          //_futureBuilder(),
-                        ],
-                      );
-                    }
-                    else{
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          _inputSection(),
-                        ],
-                      );
-                    }
-                  }
-                ),
-            )));
+    return Builder(
+        builder: (context) {
+          if (widget.blindMode == true && widget.voiceToTextMode == false) {
+            return _inputSection_blind_mode();
+          }
+          else
+          if (widget.blindMode == false && widget.voiceToTextMode == true) {
+            return _inputSection_voice_to_text_mode();
+          }
+          else if (widget.blindMode == true && widget.voiceToTextMode == true) {
+            return _inputSection_all_mode();
+          }
+          else {
+            return _inputSection();
+          }
+        }
+    );
   }
 
   /*Widget _futureBuilder() => FutureBuilder<dynamic>(
@@ -518,39 +495,150 @@ class _TextBarState extends State<TextBar> {
 
   //value of the text field will be stored in this widget:-
   String? text_field_value;
-  //TODO: NORMAL PARAMETERS WORKING IS NEEDED TO BE ADDED FURTHER IN THE FOLLOWING METHODS:-
   //THIS METHOD HANDELS THE TEXT FIELD WORKING WITHOUT ANY MODE ON:-
   Widget _inputSection() => Container(
-      alignment: Alignment.topCenter,
-      padding: EdgeInsets.only(top: 25.0, left: 25.0, right: 25.0),
-      child: TextField(
-        autocorrect: widget.autoCorrect,
-        style: TextStyle(color: widget.text_color),
+    alignment: Alignment.topCenter,
+    padding: EdgeInsets.only(top: 25.0, left: 25.0, right: 25.0),
+
+    child: TypeAheadField(
+      //it contains all the config of a textfield:-
+
+      key: widget.key,
+      textFieldConfiguration: TextFieldConfiguration(
+        controller: widget.controller,
+        textInputAction: widget.textInputAction,
+        textCapitalization: widget.textCapitalization,
+        style: widget.style,
+        textAlign: widget.textAlign,
+        textDirection: widget.textDirection,
+        autofocus: widget.autofocus,
+        obscureText: widget.obscureText,
+        autocorrect: widget.autocorrect,
+        enableSuggestions: widget.enableSuggestions,
+        maxLines: widget.maxLines,
+        minLines: widget.minLines,
+        maxLength: widget.maxLength,
+        onEditingComplete: widget.onEditingComplete,
+        onSubmitted: widget.onSubmitted,
+        inputFormatters: widget.inputFormatters,
+        enabled: widget.enabled,
+        cursorWidth: widget.cursorWidth,
+        cursorRadius: widget.cursorRadius,
+        cursorColor: widget.cursorColor,
+        keyboardAppearance: widget.keyboardAppearance,
+        scrollPadding: widget.scrollPadding,
+        enableInteractiveSelection: widget.enableInteractiveSelection,
+        onTap: widget.onTap,
+
+        decoration: widget.decoration,
         onChanged: widget.onChanged,
-      ),);
+      ),
+
+      suggestionsCallback: (prefix){
+        List<String> recommendations_list; //contains all the recommendations for the specified prefix
+        recommendations_list = AutoSuggest_Algo().recommendations(prefix);
+        return recommendations_list;
+      },
+      itemBuilder: (context, suggestions) {
+        if(suggestions != null){
+          return ListTile(
+            title: Text(suggestions.toString()),
+          );
+        }
+        else{
+          return ListTile();
+        }
+      },
+      onSuggestionSelected: (suggestions) {
+        setState(() {
+          text_field_value = suggestions.toString();  //TODO; APPLY onSuggestionSelected WHEN WE SELECT A OPTION IT MUST APPEAR ON THE TEXTFIELD ITSELF
+        });
+      },
+
+    ),
+  );
+
 
 
   //THIS METHOD HANDELS THE TEXT FIELD WORKING OF THE BLIND MODE:-
   Widget _inputSection_blind_mode() => Container(
-      alignment: Alignment.topCenter,
-      padding: EdgeInsets.only(top: 25.0, left: 25.0, right: 25.0),
-      child: TextField(
-        autocorrect: widget.autoCorrect,
-        style: TextStyle(color: widget.text_color),
-        onChanged: (String value) async{
-          if(value.endsWith(' ')){
+    alignment: Alignment.topCenter,
+    padding: EdgeInsets.only(top: 25.0, left: 25.0, right: 25.0),
+
+    child: TypeAheadField(
+      //it contains all the config of a textfield:-
+
+      key: widget.key,
+      textFieldConfiguration: TextFieldConfiguration(
+        controller: widget.controller,
+        textInputAction: widget.textInputAction,
+        textCapitalization: widget.textCapitalization,
+        style: widget.style,
+        textAlign: widget.textAlign,
+        textDirection: widget.textDirection,
+        autofocus: widget.autofocus,
+        obscureText: widget.obscureText,
+        autocorrect: widget.autocorrect,
+        enableSuggestions: widget.enableSuggestions,
+        maxLines: widget.maxLines,
+        minLines: widget.minLines,
+        maxLength: widget.maxLength,
+        onEditingComplete: widget.onEditingComplete,
+        onSubmitted: widget.onSubmitted,
+        inputFormatters: widget.inputFormatters,
+        enabled: widget.enabled,
+        cursorWidth: widget.cursorWidth,
+        cursorRadius: widget.cursorRadius,
+        cursorColor: widget.cursorColor,
+        keyboardAppearance: widget.keyboardAppearance,
+        scrollPadding: widget.scrollPadding,
+        enableInteractiveSelection: widget.enableInteractiveSelection,
+        onTap: widget.onTap,
+
+        decoration: widget.decoration,
+        //for blind mode functionalities:-
+        onChanged: (text_field_value) async{
+          flutterTts.setLanguage(widget.speaker_language!);
+          if(text_field_value.endsWith(' ')){
             await _speak();
             latest_word_in_textbar = null;
           }
           else{
             _stop();
           }
-          _onChange(value);
+          _onChange(text_field_value);
         },
-      ));
+      ),
+
+      suggestionsCallback: (prefix){
+        List<String> recommendations_list; //contains all the recommendations for the specified prefix
+        recommendations_list = AutoSuggest_Algo().recommendations(prefix);
+        return recommendations_list;
+      },
+      itemBuilder: (context, suggestions) {
+        if(suggestions != null){
+          return ListTile(
+            title: Text(suggestions.toString()),
+          );
+        }
+        else{
+          return ListTile();
+        }
+      },
+      onSuggestionSelected: (suggestions) {
+        setState(() {
+          text_field_value = suggestions.toString();  //TODO; APPLY onSuggestionSelected WHEN WE SELECT A OPTION IT MUST APPEAR ON THE TEXTFIELD ITSELF
+        });
+      },
+
+    ),
+  );
 
 
-  Widget _languageDropDownSection(dynamic languages) => Container(
+
+
+  //for showing all the language options available for the user
+  /*Widget _languageDropDownSection(dynamic languages) => Container(
       padding: EdgeInsets.only(top: 50.0),
       child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
         DropdownButton(
@@ -562,26 +650,81 @@ class _TextBarState extends State<TextBar> {
           visible: isAndroid,
           child: Text("Is installed: $isCurrentLanguageInstalled"),
         ),
-      ]));
+      ]));*/
+
+
 
 
   //THIS METHOD HANDELS THE TEXT FIELD WORKING OF THE VOICE TO TEXT MODE :-
   Widget _inputSection_voice_to_text_mode() => Container(
-      alignment: Alignment.topCenter,
-      padding: EdgeInsets.only(top: 25.0, left: 25.0, right: 25.0),
+    alignment: Alignment.topCenter,
+    padding: EdgeInsets.only(top: 25.0, left: 25.0, right: 25.0),
 
-      child: TextField(
-        autocorrect: widget.autoCorrect,
-        style: TextStyle(color: widget.text_color),
+    child: TypeAheadField(
+      //it contains all the config of a textfield:-
+
+      key: widget.key,
+      textFieldConfiguration: TextFieldConfiguration(
+        controller: widget.controller,
+        textInputAction: widget.textInputAction,
+        textCapitalization: widget.textCapitalization,
+        style: widget.style,
+        textAlign: widget.textAlign,
+        textDirection: widget.textDirection,
+        autofocus: widget.autofocus,
+        obscureText: widget.obscureText,
+        autocorrect: widget.autocorrect,
+        enableSuggestions: widget.enableSuggestions,
+        maxLines: widget.maxLines,
+        minLines: widget.minLines,
+        maxLength: widget.maxLength,
+        onEditingComplete: widget.onEditingComplete,
+        onSubmitted: widget.onSubmitted,
+        inputFormatters: widget.inputFormatters,
+        enabled: widget.enabled,
+        cursorWidth: widget.cursorWidth,
+        cursorRadius: widget.cursorRadius,
+        cursorColor: widget.cursorColor,
+        keyboardAppearance: widget.keyboardAppearance,
+        scrollPadding: widget.scrollPadding,
+        enableInteractiveSelection: widget.enableInteractiveSelection,
+        onTap: widget.onTap,
+
         decoration: InputDecoration(
-            suffixIcon: IconButton(
-              onPressed: _hasSpeech ? null : initSpeechState,
-              icon: widget.voice_button_icon,
-            )
+          //for stt functionality:-
+          suffixIcon: IconButton(
+            onPressed: _hasSpeech ? null : initSpeechState,
+            icon: widget.voice_button_icon,
+          ),
         ),
-
+        //for blind mode functionalities:-
         onChanged: widget.onChanged,
-      ));
+      ),
+
+      suggestionsCallback: (prefix){
+        List<String> recommendations_list; //contains all the recommendations for the specified prefix
+        recommendations_list = AutoSuggest_Algo().recommendations(prefix);
+        return recommendations_list;
+      },
+      itemBuilder: (context, suggestions) {
+        if(suggestions != null){
+          return ListTile(
+            title: Text(suggestions.toString()),
+          );
+        }
+        else{
+          return ListTile();
+        }
+      },
+      onSuggestionSelected: (suggestions) {
+        setState(() {
+          text_field_value = suggestions.toString();  //TODO; APPLY onSuggestionSelected WHEN WE SELECT A OPTION IT MUST APPEAR ON THE TEXTFIELD ITSELF
+        });
+      },
+    ),
+  );
+
+
 
 
   //THIS METHOD HANDELS THE TEXT FIELD WORKING OF THE BOTH BLIND MODE AND VOICE TO TEXT MODE TOGETHER:-
@@ -591,17 +734,44 @@ Widget _inputSection_all_mode() => Container(
 
     child: TypeAheadField(
       //it contains all the config of a textfield:-
+
+      key: widget.key,
       textFieldConfiguration: TextFieldConfiguration(
-        autocorrect: widget.autoCorrect,
-        style: TextStyle(color: widget.text_color),
+        controller: widget.controller,
+        textInputAction: widget.textInputAction,
+        textCapitalization: widget.textCapitalization,
+        style: widget.style,
+        textAlign: widget.textAlign,
+        textDirection: widget.textDirection,
+        autofocus: widget.autofocus,
+        obscureText: widget.obscureText,
+        autocorrect: widget.autocorrect,
+        enableSuggestions: widget.enableSuggestions,
+        maxLines: widget.maxLines,
+        minLines: widget.minLines,
+        maxLength: widget.maxLength,
+        onEditingComplete: widget.onEditingComplete,
+        onSubmitted: widget.onSubmitted,
+        inputFormatters: widget.inputFormatters,
+        enabled: widget.enabled,
+        cursorWidth: widget.cursorWidth,
+        cursorRadius: widget.cursorRadius,
+        cursorColor: widget.cursorColor,
+        keyboardAppearance: widget.keyboardAppearance,
+        scrollPadding: widget.scrollPadding,
+        enableInteractiveSelection: widget.enableInteractiveSelection,
+        onTap: widget.onTap,
+
         decoration: InputDecoration(
+          //for stt functionality:-
             suffixIcon: IconButton(
               onPressed: _hasSpeech ? null : initSpeechState,
               icon: widget.voice_button_icon,
-            )
+            ),
         ),
         //for blind mode functionalities:-
         onChanged: (text_field_value) async{
+          flutterTts.setLanguage(widget.speaker_language!);
           if(text_field_value.endsWith(' ')){
             await _speak();
             latest_word_in_textbar = null;

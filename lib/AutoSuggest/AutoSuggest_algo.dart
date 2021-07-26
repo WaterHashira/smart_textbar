@@ -23,12 +23,12 @@ class AutoSuggest_Algo{
     }
   }*/
 
+  //package for populating trie when app is run for the first time
   void populatingTrie(bool FirstRun) async{
     if(FirstRun){
       //var engine = engineSelecter(FirstRun);
       final int dictionaryLength = word_dictionary.length;
       for(int i = dictionaryLength-1 ; i >= 0 ; i--){
-        //TODO: ACCORDING TO WRITTEN INN REGISTER
         for(int j=0 ; j < dictionaryLength-i ; j++){
           engine.enter(word_dictionary[i]);
         }
@@ -39,7 +39,6 @@ class AutoSuggest_Algo{
       //var engine = engineSelecter(FirstRun);
       final int dictionaryLength = word_dictionary.length;
       for(int i = dictionaryLength-1 ; i >= 0 ; i--){
-        //TODO: ACCORDING TO WRITTEN INN REGISTER
         for(int j=0 ; j < dictionaryLength-i ; j++){
           engine.enter(word_dictionary[i]);
         }
@@ -48,7 +47,7 @@ class AutoSuggest_Algo{
     }
   }
 
-
+//package for providing the autocomplete recommendations on the basis of the prefix given
   List<String> recommendations (String prefix){
     return engine.suggest(prefix);
   }
