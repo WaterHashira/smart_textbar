@@ -118,6 +118,9 @@ class _ExState extends State<Ex> {
  
  **How to use Blind Mode?**
  - Set the bool property of the  **TextBar()** widget, **blindMode** as true this would allow all the properties that are included in blindMode to show effect in the widget according to their values.
+
+(By this version Blind mode will be able to support english language in over 60 accents from all over the world)
+
  - **BlindMode Properties:**  
  
  Property | Data Type | Explanation
